@@ -21,6 +21,7 @@ const SPLUNK_HEC_TOKEN: &str = "splunk_hec_token";
 
 /// The top-level metadata structure contained by both `struct Metric`
 /// and `struct LogEvent` types.
+#[allow(clippy::unsafe_derive_deserialize)]
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct EventMetadata {
     /// Arbitrary data stored with an event
@@ -367,7 +368,7 @@ impl EventMetadata {
         // This use of uninitialized invalid values is safe because we immediately replace the value
         // with a modified schema. We could probably avoid this `unsafe` by owning `self`, but that
         // makes the calling convention harder here, since most callers will only have a `&mut self`.
-        #[allow(invalid_value)]
+        #[allow(invalid_value, clippy::uninit_assumed_init)]
         let dummy = unsafe { mem::MaybeUninit::uninit().assume_init() };
         let schema = mem::replace(&mut self.schema_definition, dummy);
         let schema = Arc::unwrap_or_clone(schema).with_meaning(target_path, meaning);
