@@ -6,25 +6,6 @@ use tracing::warn;
 
 use crate::FilePosition;
 
-use std::ops::Deref;
-
-/// Trait to allow trimming ascii null from a &[u8].
-pub trait TrimAsciiNull {
-    /// Trim ascii null from the start and end of a slice.
-    fn trim_ascii_null(&self) -> &[u8];
-}
-
-impl<T: Deref<Target=[u8]>> TrimAsciiNull for T {
-    fn trim_ascii_null(&self) -> &[u8] {
-        let from = match self.iter().position(|x| x != &0x00) {
-            Some(i) => i,
-            None => return &self[0..0],
-        };
-        let to = self.iter().rposition(|x| x != &0x00).unwrap();
-        &self[from..=to]
-    }
-}
-
 /// Read up to `max_size` bytes from `reader`, splitting by `delim`
 ///
 /// The function reads up to `max_size` bytes from `reader`, splitting the input
@@ -66,11 +47,14 @@ pub fn read_until_with_max_size<R: BufRead + ?Sized>(
             Err(e) => return Err(e),
         };
 
-        // trim null bytes from start and end of slice
-        let available = available.trim_ascii_null();
-        if available.len() == 0 {
-            buf.clear();
-            continue;
+        if available.len() > 0 && &available[0] == b'\0' {
+                warn!(
+                    message = "Reached line beginning with NULL.",
+                    internal_log_rate_limit = true
+                );
+                buf.clear();
+                return Ok(None);
+            }
         }
 
         let (done, used) = {
