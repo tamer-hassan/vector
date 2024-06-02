@@ -15,7 +15,7 @@ use futures::{
 };
 use indexmap::IndexMap;
 use tokio::time::sleep;
-use tracing::{debug, error, info, trace};
+use tracing::{debug, error, info, trace, warn};
 
 use crate::{
     checkpointer::{Checkpointer, CheckpointsView},
@@ -241,6 +241,13 @@ where
                 let start = time::Instant::now();
                 let mut bytes_read: usize = 0;
                 while let Ok(Some(line)) = watcher.read_line() {
+                    if line.bytes[0] == b'\0' {
+                        warn!(
+                            message = "Encountered line that begins with \0.",
+                            internal_log_rate_limit = true
+                        );
+                        break;
+                    }
                     let sz = line.bytes.len();
                     trace!(
                         message = "Read bytes.",
