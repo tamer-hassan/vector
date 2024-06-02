@@ -69,7 +69,8 @@ pub fn read_until_with_max_size<R: BufRead + ?Sized>(
         // trim null bytes from start and end of slice
         let available = available.trim_ascii_null();
         if available.len() == 0 {
-            return Ok(Some(0));
+            buf.clear();
+            continue;
         }
 
         let (done, used) = {
