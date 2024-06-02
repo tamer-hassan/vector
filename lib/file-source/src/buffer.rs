@@ -47,7 +47,7 @@ pub fn read_until_with_max_size<R: BufRead + ?Sized>(
             Err(e) => return Err(e),
         };
 
-        if available.len() > 0 && &available[0] == b'\0' {
+        if available.len() > 0 && available[0] == b'\0' {
                 warn!(
                     message = "Reached line beginning with NULL.",
                     internal_log_rate_limit = true
