@@ -68,6 +68,14 @@ pub fn read_until_with_max_size<R: BufRead + ?Sized>(
 
         // trim null bytes from start and end of slice
         let available = available.trim_ascii_null();
+        if available.len() == 0 {
+            warn!(
+                message = "Reached line consisting only of NULLs.",
+                internal_log_rate_limit = true
+            );
+            *position -= buf.len() as u64;
+            buf.clear();
+        }
 
         let (done, used) = {
             match delim_finder.find(available) {
