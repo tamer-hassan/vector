@@ -53,7 +53,7 @@ pub fn read_until_with_max_size<R: BufRead + ?Sized>(
                 internal_log_rate_limit = true
             );
             buf.clear();
-            continue;
+            return Ok(None);
         }
 
         let (done, used) = {
