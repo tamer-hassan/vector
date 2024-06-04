@@ -47,6 +47,11 @@ pub fn read_until_with_max_size<R: BufRead + ?Sized>(
             Err(e) => return Err(e),
         };
 
+        if available.len() > 0 && available[0] == b'\0' {
+            buf.extend_from_slice(&available[..1]);
+            return Ok(None);
+        }
+
         let (done, used) = {
             match delim_finder.find(available) {
                 Some(i) => {
