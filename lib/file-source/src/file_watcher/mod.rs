@@ -43,6 +43,7 @@ pub struct FileWatcher {
     inode: u64,
     is_dead: bool,
     reached_eof: bool,
+    reached_nul: bool,
     last_read_attempt: Instant,
     last_read_success: Instant,
     last_seen: Instant,
@@ -146,6 +147,7 @@ impl FileWatcher {
             inode: ino,
             is_dead: false,
             reached_eof: false,
+            reached_nul: false,
             last_read_attempt: ts,
             last_read_success: ts,
             last_seen: ts,
@@ -244,7 +246,12 @@ impl FileWatcher {
                         }))
                     }
                 } else {
-                    self.reached_eof = true;
+                    let buf = self.buf.split().freeze();
+                    if buf.is_empty() {
+                        self.reached_eof = true;
+                    } else {
+                        self.reached_nul = true;
+                    }
                     Ok(None)
                 }
             }
@@ -286,6 +293,11 @@ impl FileWatcher {
     #[inline]
     pub fn reached_eof(&self) -> bool {
         self.reached_eof
+    }
+
+    #[inline]
+    pub fn reached_nul(&self) -> bool {
+        self.reached_nul
     }
 }
 

@@ -307,6 +307,8 @@ where
                         .emit_file_unwatched(&watcher.path, watcher.reached_eof());
                     checkpoints.set_dead(*file_id);
                     false
+                } else if watcher.reached_nul() {
+                    false
                 } else {
                     true
                 }
