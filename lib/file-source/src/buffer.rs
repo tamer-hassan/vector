@@ -48,6 +48,7 @@ pub fn read_until_with_max_size<R: BufRead + ?Sized>(
         };
 
         if available.len() > 0 && available[0] == b'\0' {
+            buf.extend_from_slice(b'\0');
             return Ok(None);
         }
 
