@@ -7,7 +7,7 @@ use chrono::Utc;
 use databend_client::APIClient as DatabendAPIClient;
 use databend_client::Error as DatabendError;
 use futures::future::BoxFuture;
-use rand::{thread_rng, Rng};
+use rand::{rng, Rng};
 use rand_distr::Alphanumeric;
 use snafu::Snafu;
 use tower::Service;
@@ -116,7 +116,7 @@ impl DatabendService {
             .client
             .current_database()
             .unwrap_or("default".to_string());
-        let suffix = thread_rng()
+        let suffix = rng()
             .sample_iter(&Alphanumeric)
             .take(8)
             .map(char::from)
